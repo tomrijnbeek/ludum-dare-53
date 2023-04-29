@@ -14,6 +14,7 @@ public sealed class Vehicle : MonoBehaviour
     public Vector3Int LogicalTile => logicalTile;
     public Direction Orientation { get; private set; } = Direction.PositiveX;
     public int RangePerTurn => rangePerTurn;
+    public Path PreparedPath { get; private set; }
 
     private LineRenderer lineRenderer;
 
@@ -23,12 +24,9 @@ public sealed class Vehicle : MonoBehaviour
 
     private void Start()
     {
-        transform.position = cityMap.TileToCenterWorld(logicalTile);
         lineRenderer = GetComponent<LineRenderer>();
-        if (pathQueue.Count == 0)
-        {
-            lineRenderer.positionCount = 0;
-        }
+        transform.position = cityMap.TileToCenterWorld(logicalTile);
+        setLineRendererVertices();
     }
 
     private void Update()
@@ -71,26 +69,24 @@ public sealed class Vehicle : MonoBehaviour
 
     public void PreparePath(Path path)
     {
-        if (pathQueue.Count > 0)
-        {
-            pathQueue.Clear();
-        }
-
-        foreach (var dir in path.Directions)
-        {
-            pathQueue.Enqueue(dir);
-        }
-        setLineRendererVertices(path);
+        PreparedPath = path;
+        setLineRendererVertices();
     }
 
-    private void setLineRendererVertices(Path path)
+    private void setLineRendererVertices()
     {
-        var vertices = new Vector3[path.Length + 1];
-        vertices[0] = cityMap.TileToCenterWorld(path.Start).WithY(lineHeight);
-        var curr = path.Start;
-        for (var i = 0; i < path.Length; i++)
+        if (PreparedPath.Length == 0)
         {
-            curr = curr.Neighbour(path.Directions[i]);
+            lineRenderer.positionCount = 0;
+            return;
+        }
+
+        var vertices = new Vector3[PreparedPath.Length + 1];
+        vertices[0] = cityMap.TileToCenterWorld(PreparedPath.Start).WithY(lineHeight);
+        var curr = PreparedPath.Start;
+        for (var i = 0; i < PreparedPath.Length; i++)
+        {
+            curr = curr.Neighbour(PreparedPath.Directions[i]);
             vertices[i + 1] = cityMap.TileToCenterWorld(curr).WithY(lineHeight);
         }
 
@@ -100,7 +96,17 @@ public sealed class Vehicle : MonoBehaviour
 
     public VehicleMovement TraversePreparedPath()
     {
+        if (pathQueue.Count > 0)
+        {
+            pathQueue.Clear();
+        }
+        foreach (var dir in PreparedPath.Directions)
+        {
+            pathQueue.Enqueue(dir);
+        }
+
         isMoving = true;
+        PreparedPath = Path.Empty;
         return new VehicleMovement(() => isMoving == false);
     }
 

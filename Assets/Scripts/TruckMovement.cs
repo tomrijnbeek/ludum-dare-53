@@ -34,7 +34,7 @@ public sealed class TruckMovement : MonoBehaviour
             truck.PreparePath(path.Clamped(truck.RangePerTurn));
         }
 
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) && truck.PreparedPath.Length > 0)
         {
             PathSelected?.Invoke();
         }

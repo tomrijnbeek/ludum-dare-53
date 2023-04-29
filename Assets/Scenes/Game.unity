@@ -133,6 +133,7 @@ GameObject:
   m_Component:
   - component: {fileID: 131447441}
   - component: {fileID: 131447440}
+  - component: {fileID: 131447442}
   m_Layer: 0
   m_Name: Pineapple Police
   m_TagString: Untagged
@@ -171,6 +172,19 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &131447442
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 131447439}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f42c3e417e75f5140a39b2306ae18490, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  policeManager: {fileID: 1052179876}
 --- !u!1 &161024480
 GameObject:
   m_ObjectHideFlags: 0
@@ -265,6 +279,53 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 7
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1052179875
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1052179877}
+  - component: {fileID: 1052179876}
+  m_Layer: 0
+  m_Name: AI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1052179876
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1052179875}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b063b749b46925418e0e4a0f29089bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cityMap: {fileID: 1329389906}
+  movementPerTurn: 3
+  timeBetweenTurns: 10
+--- !u!4 &1052179877
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1052179875}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.06038952, y: 0.12541021, z: -0.0024089217}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1329389904
 GameObject:
@@ -939,6 +1000,7 @@ GameObject:
   - component: {fileID: 4866046652985874572}
   - component: {fileID: 3137664580896546606}
   - component: {fileID: 3170905139156743588}
+  - component: {fileID: 4866046652985874573}
   m_Layer: 0
   m_Name: Truck Chassis
   m_TagString: Untagged
@@ -1168,6 +1230,20 @@ Transform:
   m_Father: {fileID: 543450652232369266}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4866046652985874573
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3096617849172769011}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36459b7b0d9d7294a86633369fdbbfca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  amount: 0.01
+  frequency: 1.5
 --- !u!4 &5241428494132594696
 Transform:
   m_ObjectHideFlags: 0
@@ -1382,6 +1458,7 @@ GameObject:
   - component: {fileID: 5241428494132594696}
   - component: {fileID: 7110865298044655319}
   - component: {fileID: 6842788178600404312}
+  - component: {fileID: 8151109477840911903}
   m_Layer: 0
   m_Name: Police Chassis
   m_TagString: Untagged
@@ -1389,6 +1466,20 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &8151109477840911903
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8151109477840911902}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36459b7b0d9d7294a86633369fdbbfca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  amount: 0.01
+  frequency: 1.5
 --- !u!4 &8223704277542860579
 Transform:
   m_ObjectHideFlags: 0

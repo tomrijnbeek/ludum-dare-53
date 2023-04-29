@@ -1,16 +1,43 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
-public enum Direction
+public enum Direction : byte
 {
-    PositiveX,
-    PositiveY,
-    NegativeX,
-    NegativeY,
+    PositiveX = 1,
+    PositiveY = 2,
+    NegativeX = 3,
+    NegativeY = 4,
 }
 
-public static class Directions
+[Flags]
+public enum Directions : byte
 {
+    None = 0,
+    PositiveX = 1,
+    PositiveY = 2,
+    NegativeX = 4,
+    NegativeY = 8,
+}
+
+public static class DirectionHelpers
+{
+    public static Directions ToFlags(this Direction direction) => (Directions) (1 << ((int) direction - 1));
+
+    public static Direction Opposite(this Direction direction) => direction switch
+    {
+        Direction.PositiveX => Direction.NegativeX,
+        Direction.PositiveY => Direction.NegativeY,
+        Direction.NegativeX => Direction.PositiveX,
+        Direction.NegativeY => Direction.PositiveY,
+        _ => throw new ArgumentOutOfRangeException(nameof(direction), direction, null)
+    };
+
+    public static IEnumerable<Direction> EnumerateDirections()
+    {
+        return new[] { Direction.PositiveX, Direction.PositiveY, Direction.NegativeX, Direction.NegativeY };
+    }
+
     public static (Direction X, Direction Y) FromDifference(Vector3Int difference)
     {
         var x = difference.x >= 0 ? Direction.PositiveX : Direction.NegativeX;

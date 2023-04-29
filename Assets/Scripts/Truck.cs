@@ -4,8 +4,10 @@ using UnityEngine;
 public sealed class Truck : MonoBehaviour
 {
     [SerializeField] private Vector3Int logicalTile;
-    [SerializeField] private Grid grid;
+    [SerializeField] private CityMap cityMap;
     [SerializeField] private float tilesPerSecond = 2;
+
+    public Vector3Int LogicalTile => logicalTile;
 
     private readonly Queue<Direction> path = new();
     private TileTransition? currentTransition;
@@ -13,7 +15,7 @@ public sealed class Truck : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        transform.position = grid.GetCellCenterWorld(logicalTile);
+        transform.position = cityMap.TileToCenterWorld(logicalTile);
     }
 
     // Update is called once per frame
@@ -41,41 +43,23 @@ public sealed class Truck : MonoBehaviour
             var toTile = logicalTile;
             transform.forward = dir.Forward();
             currentTransition = new TileTransition(
-                grid.GetCellCenterWorld(fromTile),
-                grid.GetCellCenterWorld(toTile),
+                cityMap.TileToCenterWorld(fromTile),
+                cityMap.TileToCenterWorld(toTile),
                 Time.time,
                 Time.time + 1 / tilesPerSecond);
         }
     }
 
-    public void SetDestination(Vector3Int destination)
+    public void FollowPath(Path newPath)
     {
         if (path.Count > 0)
         {
             path.Clear();
         }
 
-        foreach (var dir in makePath(destination))
+        foreach (var dir in newPath.Directions)
         {
             path.Enqueue(dir);
-        }
-    }
-
-    private IEnumerable<Direction> makePath(Vector3Int destination)
-    {
-        var (xDir, yDir) = Directions.FromDifference(destination - logicalTile);
-        var x = logicalTile.x;
-        var y = logicalTile.y;
-
-        while (x != destination.x)
-        {
-            x += xDir.Numeric();
-            yield return xDir;
-        }
-        while (y != destination.y)
-        {
-            y += yDir.Numeric();
-            yield return yDir;
         }
     }
 

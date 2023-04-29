@@ -1,13 +1,18 @@
-using JetBrains.Annotations;
+using System.Collections.Generic;
 using UnityEngine;
 
 public sealed class TurnState : MonoBehaviour
 {
     [SerializeField] private PoliceManager policeManager;
     [SerializeField] private TruckMovement playerMovement;
+    [SerializeField] private VehicleLocations vehicleLocations;
+    [SerializeField] private float movementTicksPerSecond = 6;
     [Readonly] private State state;
 
-    [CanBeNull] private VehicleMovement ongoingMovement;
+    private float movementTickDuration => 1 / movementTicksPerSecond;
+
+    private readonly List<VehicleMovement> ongoingMovements = new();
+    private float nextMovementTick;
 
     private void Start()
     {
@@ -25,25 +30,45 @@ public sealed class TurnState : MonoBehaviour
 
     private void Update()
     {
-        if (state == State.Movement && (ongoingMovement?.Done ?? true))
+        if (state != State.Movement) return;
+
+        if (Time.time >= nextMovementTick)
         {
-            toPlayerInputState();
+            var allDone = true;
+            foreach (var vm in ongoingMovements)
+            {
+                allDone = allDone && vm.Done;
+                if (!vm.Done)
+                {
+                    vm.DoTick(movementTickDuration);
+                }
+            }
+
+            if (allDone)
+            {
+                toPlayerInputState();
+            }
+            else
+            {
+                vehicleLocations.CommitTransitions();
+                nextMovementTick = Time.time + movementTickDuration;
+            }
         }
     }
 
     private void toPlayerInputState()
     {
         state = State.PlayerInput;
-        ongoingMovement = null;
+        ongoingMovements.Clear();
         policeManager.PrepareTurn();
     }
 
     private void toMovementState()
     {
         state = State.Movement;
-        ongoingMovement = VehicleMovement.Composite(
-            playerMovement.ExecuteTurn(),
-            policeManager.ExecuteTurn());
+        ongoingMovements.Add(playerMovement.CommitMovement());
+        ongoingMovements.AddRange(policeManager.CommitMovement());
+        nextMovementTick = Time.time;
     }
 
     private enum State

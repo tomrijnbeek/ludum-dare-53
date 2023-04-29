@@ -40,9 +40,9 @@ public sealed class TruckMovement : MonoBehaviour
         }
     }
 
-    public VehicleMovement ExecuteTurn()
+    public VehicleMovement CommitMovement()
     {
-        currentMovement = truck.TraversePreparedPath();
+        currentMovement = truck.CommitVehicleMovement();
         return currentMovement;
     }
 

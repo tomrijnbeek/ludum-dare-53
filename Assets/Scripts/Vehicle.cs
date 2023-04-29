@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(LineRenderer))]
@@ -7,26 +6,29 @@ public sealed class Vehicle : MonoBehaviour
     private const float lineHeight = 0.05f;
 
     [SerializeField] private Vector3Int logicalTile;
+    [SerializeField] private Direction orientation = Direction.PositiveX;
     [SerializeField] private CityMap cityMap;
-    [SerializeField] private float tilesPerSecond = 6;
+    [SerializeField] private VehicleLocations vehicleLocations;
     [SerializeField] private int rangePerTurn = 3;
+    [SerializeField] private bool loseOnCollision = false;
 
     public Vector3Int LogicalTile => logicalTile;
-    public Direction Orientation { get; private set; } = Direction.PositiveX;
+    public Direction Orientation => orientation;
     public int RangePerTurn => rangePerTurn;
+    public bool LoseOnCollision => loseOnCollision;
     public Path PreparedPath { get; private set; }
 
     private LineRenderer lineRenderer;
 
-    private readonly Queue<Direction> pathQueue = new();
     private TileTransition? currentTransition;
-    private bool isMoving;
 
     private void Start()
     {
         lineRenderer = GetComponent<LineRenderer>();
         transform.position = cityMap.TileToCenterWorld(logicalTile);
+        transform.forward = orientation.Forward();
         setLineRendererVertices();
+        vehicleLocations.RegisterVehicle(logicalTile, this);
     }
 
     private void Update()
@@ -43,27 +45,6 @@ public sealed class Vehicle : MonoBehaviour
                 var t = (Time.time - transition.StartTime) / transition.Duration;
                 transform.position = transition.From + t * transition.Difference;
             }
-        }
-
-        if (isMoving && pathQueue.Count > 0 && currentTransition is null)
-        {
-            var dir = pathQueue.Dequeue();
-            Orientation = dir;
-            var fromTile = logicalTile;
-            logicalTile = logicalTile.Neighbour(dir);
-            var toTile = logicalTile;
-            transform.forward = dir.Forward();
-            currentTransition = new TileTransition(
-                cityMap.TileToCenterWorld(fromTile),
-                cityMap.TileToCenterWorld(toTile),
-                Time.time,
-                Time.time + 1 / tilesPerSecond);
-        }
-
-        if (pathQueue.Count == 0 && isMoving)
-        {
-            isMoving = false;
-            lineRenderer.positionCount = 0;
         }
     }
 
@@ -94,20 +75,26 @@ public sealed class Vehicle : MonoBehaviour
         lineRenderer.SetPositions(vertices);
     }
 
-    public VehicleMovement TraversePreparedPath()
+    public VehicleMovement CommitVehicleMovement()
     {
-        if (pathQueue.Count > 0)
-        {
-            pathQueue.Clear();
-        }
-        foreach (var dir in PreparedPath.Directions)
-        {
-            pathQueue.Enqueue(dir);
-        }
-
-        isMoving = true;
+        var vm = new VehicleMovement(this, PreparedPath);
         PreparedPath = Path.Empty;
-        return new VehicleMovement(() => isMoving == false);
+        return vm;
+    }
+
+    public void MoveInDirection(Direction dir, float tickDuration)
+    {
+        orientation = dir;
+        var fromTile = logicalTile;
+        logicalTile = logicalTile.Neighbour(dir);
+        var toTile = logicalTile;
+        transform.forward = dir.Forward();
+        currentTransition = new TileTransition(
+            cityMap.TileToCenterWorld(fromTile),
+            cityMap.TileToCenterWorld(toTile),
+            Time.time,
+            Time.time + tickDuration);
+        vehicleLocations.QueueTransition(this, fromTile, toTile);
     }
 
     private readonly struct TileTransition

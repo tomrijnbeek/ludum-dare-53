@@ -34,10 +34,10 @@ public sealed class PoliceManager : MonoBehaviour
         vehicle.PreparePath(path);
     }
 
-    public VehicleMovement ExecuteTurn()
+    public IEnumerable<VehicleMovement> CommitMovement()
     {
         turnPrepared = false;
-        return VehicleMovement.Composite(vehicles.Select(v => v.Vehicle.TraversePreparedPath()).ToList());
+        return vehicles.Select(v => v.Vehicle.CommitVehicleMovement()).ToList();
     }
 
     private Path generateRandomPath(Vector3Int startTile, int length, Direction orientation)

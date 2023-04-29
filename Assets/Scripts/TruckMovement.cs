@@ -1,19 +1,10 @@
-using System;
 using UnityEngine;
-using UnityEngine.Tilemaps;
 
 public sealed class TruckMovement : MonoBehaviour
 {
-    [SerializeField] private GameObject truck;
-    [SerializeField] private Tilemap tilemap;
+    [SerializeField] private Truck truck;
     [SerializeField] private Grid grid;
     [SerializeField] private new Camera camera;
-    private Truck truckComponent;
-
-    private void Start()
-    {
-        truckComponent = truck.GetComponent<Truck>();
-    }
 
     private void Update()
     {
@@ -25,7 +16,7 @@ public sealed class TruckMovement : MonoBehaviour
             {
                 var point = ray.GetPoint(t);
                 var cell = grid.WorldToCell(point);
-                truckComponent.SetDestination(cell);
+                truck.SetDestination(cell);
             }
         }
     }

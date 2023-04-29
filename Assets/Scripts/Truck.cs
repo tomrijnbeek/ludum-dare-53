@@ -14,7 +14,7 @@ public sealed class Truck : MonoBehaviour
     void Start()
     {
         syncPositionWithLogical();
-        SetDestination(new Vector3Int(2, 2));
+        // SetDestination(new Vector3Int(2, 2));
     }
 
     // Update is called once per frame

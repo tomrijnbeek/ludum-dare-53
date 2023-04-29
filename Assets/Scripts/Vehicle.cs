@@ -1,25 +1,34 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(LineRenderer))]
 public sealed class Vehicle : MonoBehaviour
 {
+    private const float lineHeight = 0.05f;
+
     [SerializeField] private Vector3Int logicalTile;
     [SerializeField] private CityMap cityMap;
     [SerializeField] private float tilesPerSecond = 2;
 
     public Vector3Int LogicalTile => logicalTile;
 
-    private readonly Queue<Direction> path = new();
-    private TileTransition? currentTransition;
+    private LineRenderer lineRenderer;
 
-    // Start is called before the first frame update
-    void Start()
+    private readonly Queue<Direction> pathQueue = new();
+    private TileTransition? currentTransition;
+    private bool isMoving;
+
+    private void Start()
     {
         transform.position = cityMap.TileToCenterWorld(logicalTile);
+        lineRenderer = GetComponent<LineRenderer>();
+        if (pathQueue.Count == 0)
+        {
+            lineRenderer.positionCount = 0;
+        }
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
         if (currentTransition is { } transition)
         {
@@ -35,9 +44,9 @@ public sealed class Vehicle : MonoBehaviour
             }
         }
 
-        if (path.Count > 0 && currentTransition is null)
+        if (isMoving && pathQueue.Count > 0 && currentTransition is null)
         {
-            var dir = path.Dequeue();
+            var dir = pathQueue.Dequeue();
             var fromTile = logicalTile;
             logicalTile = logicalTile.Neighbour(dir);
             var toTile = logicalTile;
@@ -48,19 +57,47 @@ public sealed class Vehicle : MonoBehaviour
                 Time.time,
                 Time.time + 1 / tilesPerSecond);
         }
+
+        if (pathQueue.Count == 0 && isMoving)
+        {
+            isMoving = false;
+            lineRenderer.positionCount = 0;
+        }
     }
 
-    public void FollowPath(Path newPath)
+    public void PreparePath(Path path)
     {
-        if (path.Count > 0)
+        if (pathQueue.Count > 0)
         {
-            path.Clear();
+            pathQueue.Clear();
         }
 
-        foreach (var dir in newPath.Directions)
+        foreach (var dir in path.Directions)
         {
-            path.Enqueue(dir);
+            pathQueue.Enqueue(dir);
         }
+        setLineRendererVertices(path);
+    }
+
+    private void setLineRendererVertices(Path path)
+    {
+        var vertices = new Vector3[path.Length + 1];
+        vertices[0] = cityMap.TileToCenterWorld(path.Start).WithY(lineHeight);
+        var curr = path.Start;
+        for (var i = 0; i < path.Length; i++)
+        {
+            curr = curr.Neighbour(path.Directions[i]);
+            vertices[i + 1] = cityMap.TileToCenterWorld(curr).WithY(lineHeight);
+        }
+
+        lineRenderer.positionCount = vertices.Length;
+        lineRenderer.SetPositions(vertices);
+    }
+
+    public VehicleMovement TraversePreparedPath()
+    {
+        isMoving = true;
+        return new VehicleMovement(() => isMoving == false);
     }
 
     private readonly struct TileTransition

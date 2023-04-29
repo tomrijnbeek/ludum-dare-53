@@ -6,40 +6,39 @@ public sealed class PoliceManager : MonoBehaviour
 {
     [SerializeField] private CityMap cityMap;
     [SerializeField] private int movementPerTurn = 3;
-    [SerializeField] private float timeBetweenTurns = 10;
 
+    private bool turnPrepared;
     private readonly List<PoliceVehicle> vehicles = new();
-    private float nextTurn;
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        nextTurn = Time.time + timeBetweenTurns;
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        if (Time.time >= nextTurn)
-        {
-            DoTurn();
-            nextTurn = Time.time + timeBetweenTurns;
-        }
-    }
 
     public void RegisterVehicle(PoliceVehicle vehicle)
     {
         vehicles.Add(vehicle);
+        if (turnPrepared)
+        {
+            prepareTurn(vehicle.Vehicle);
+        }
     }
 
-    public void DoTurn()
+    public void PrepareTurn()
     {
         foreach (var vehicle in vehicles)
         {
-            var tile = vehicle.Vehicle.LogicalTile;
-            var path = generateRandomPath(tile);
-            vehicle.Vehicle.FollowPath(path);
+            prepareTurn(vehicle.Vehicle);
         }
+        turnPrepared = true;
+    }
+
+    private void prepareTurn(Vehicle vehicle)
+    {
+        var tile = vehicle.LogicalTile;
+        var path = generateRandomPath(tile);
+        vehicle.PreparePath(path);
+    }
+
+    public VehicleMovement ExecuteTurn()
+    {
+        turnPrepared = false;
+        return VehicleMovement.Composite(vehicles.Select(v => v.Vehicle.TraversePreparedPath()).ToList());
     }
 
     private Path generateRandomPath(Vector3Int startTile)

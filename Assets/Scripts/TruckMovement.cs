@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using UnityEngine;
 
 public sealed class TruckMovement : MonoBehaviour
@@ -5,6 +6,8 @@ public sealed class TruckMovement : MonoBehaviour
     [SerializeField] private Vehicle truck;
     [SerializeField] private CityMap cityMap;
     [SerializeField] private new Camera camera;
+
+    [CanBeNull] public event VoidEventHandler PathSelected;
 
     private Pathfinder pathfinder;
 
@@ -15,10 +18,15 @@ public sealed class TruckMovement : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetMouseButtonDown(0) && tryFindTile(out var tile))
+        if (Input.GetMouseButtonDown(0) && tryFindTile(out var tile) && attemptTruckMove(tile))
         {
-            attemptTruckMove(tile);
+            PathSelected?.Invoke();
         }
+    }
+
+    public VehicleMovement ExecuteTurn()
+    {
+        return truck.TraversePreparedPath();
     }
 
     private bool tryFindTile(out Vector3Int tile)
@@ -35,13 +43,14 @@ public sealed class TruckMovement : MonoBehaviour
         return false;
     }
 
-    private void attemptTruckMove(Vector3Int tile)
+    private bool attemptTruckMove(Vector3Int tile)
     {
         if (!pathfinder.TryFindPath(truck.LogicalTile, tile, out var path))
         {
-            return;
+            return false;
         }
 
-        truck.FollowPath(path);
+        truck.PreparePath(path);
+        return true;
     }
 }

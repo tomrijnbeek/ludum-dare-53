@@ -90,7 +90,7 @@ public class RoadSpawner : MonoBehaviour
 
     private void spawnFloor(Vector3Int tile)
     {
-        var floor = Instantiate(emptyTile);
+        var floor = Instantiate(emptyTile, transform, true);
         floor.transform.position = cityMap.TileToCenterWorld(tile);
     }
 
@@ -106,7 +106,7 @@ public class RoadSpawner : MonoBehaviour
         }
 
         var (obj, orientation) = objectMap[roadNeighbours];
-        var road = Instantiate(obj);
+        var road = Instantiate(obj, transform, true);
         road.transform.position = cityMap.TileToCenterWorld(tile);
         road.transform.rotation = Quaternion.AngleAxis(orientation, Vector3.up);
     }

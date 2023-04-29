@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public sealed class Truck : MonoBehaviour
+public sealed class Vehicle : MonoBehaviour
 {
     [SerializeField] private Vector3Int logicalTile;
     [SerializeField] private CityMap cityMap;

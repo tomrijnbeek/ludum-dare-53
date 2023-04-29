@@ -2,7 +2,7 @@ using UnityEngine;
 
 public sealed class TruckMovement : MonoBehaviour
 {
-    [SerializeField] private Truck truck;
+    [SerializeField] private Vehicle truck;
     [SerializeField] private CityMap cityMap;
     [SerializeField] private new Camera camera;
 

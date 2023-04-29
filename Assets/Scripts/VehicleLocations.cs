@@ -56,12 +56,10 @@ public sealed class VehicleLocations : MonoBehaviour
     private void checkTransitionQueueForHeadOnCollisions()
     {
         var transitionsByOrigin = transitionQueue.ToLookup(transition => transition.From);
-        foreach (var transition in transitionQueue)
+        foreach (var (_, from, to) in transitionQueue)
         {
-            var myFrom = transition.From;
-            var myTo = transition.To;
-            var departingFromTo = transitionsByOrigin[myTo];
-            if (departingFromTo.Any(otherTransition => otherTransition.To == myFrom))
+            var departingFromTo = transitionsByOrigin[to];
+            if (departingFromTo.Any(otherTransition => otherTransition.To == from))
             {
                 lose();
                 return;

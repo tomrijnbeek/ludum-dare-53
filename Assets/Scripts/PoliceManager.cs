@@ -5,7 +5,6 @@ using UnityEngine;
 public sealed class PoliceManager : MonoBehaviour
 {
     [SerializeField] private CityMap cityMap;
-    [SerializeField] private int movementPerTurn = 3;
 
     private bool turnPrepared;
     private readonly List<PoliceVehicle> vehicles = new();
@@ -31,7 +30,7 @@ public sealed class PoliceManager : MonoBehaviour
     private void prepareTurn(Vehicle vehicle)
     {
         var tile = vehicle.LogicalTile;
-        var path = generateRandomPath(tile);
+        var path = generateRandomPath(tile, vehicle.RangePerTurn, vehicle.Orientation);
         vehicle.PreparePath(path);
     }
 
@@ -41,30 +40,30 @@ public sealed class PoliceManager : MonoBehaviour
         return VehicleMovement.Composite(vehicles.Select(v => v.Vehicle.TraversePreparedPath()).ToList());
     }
 
-    private Path generateRandomPath(Vector3Int startTile)
+    private Path generateRandomPath(Vector3Int startTile, int length, Direction orientation)
     {
-        var dirs = new Direction[movementPerTurn];
+        var dirs = new Direction[length];
         var currentTile = startTile;
-        Direction? previousDirection = null;
-        for (var i = 0; i < movementPerTurn; i++)
+        var currentDir = orientation;
+        for (var i = 0; i < length; i++)
         {
-            var dir = generateRandomDirection(currentTile, previousDirection);
+            var dir = generateRandomDirection(currentTile, currentDir);
             dirs[i] = dir;
-            previousDirection = dir;
+            currentDir = dir;
             currentTile = currentTile.Neighbour(dir);
         }
 
         return new Path(startTile, dirs);
     }
 
-    private Direction generateRandomDirection(Vector3Int tile, Direction? previousDir)
+    private Direction generateRandomDirection(Vector3Int tile, Direction previousDir)
     {
         var validDirs = DirectionHelpers.EnumerateDirections()
             .Where(dir => cityMap.IsValid(tile.Neighbour(dir)) && cityMap.TileAt(tile.Neighbour(dir)).IsRoad())
             .ToList();
-        if (validDirs.Count > 1 && previousDir is { } actualDir)
+        if (validDirs.Count > 1)
         {
-            validDirs.Remove(actualDir.Opposite());
+            validDirs.Remove(previousDir.Opposite());
         }
 
         if (validDirs.Count == 0)

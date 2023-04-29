@@ -8,9 +8,12 @@ public sealed class Vehicle : MonoBehaviour
 
     [SerializeField] private Vector3Int logicalTile;
     [SerializeField] private CityMap cityMap;
-    [SerializeField] private float tilesPerSecond = 2;
+    [SerializeField] private float tilesPerSecond = 6;
+    [SerializeField] private int rangePerTurn = 3;
 
     public Vector3Int LogicalTile => logicalTile;
+    public Direction Orientation { get; private set; } = Direction.PositiveX;
+    public int RangePerTurn => rangePerTurn;
 
     private LineRenderer lineRenderer;
 
@@ -47,6 +50,7 @@ public sealed class Vehicle : MonoBehaviour
         if (isMoving && pathQueue.Count > 0 && currentTransition is null)
         {
             var dir = pathQueue.Dequeue();
+            Orientation = dir;
             var fromTile = logicalTile;
             logicalTile = logicalTile.Neighbour(dir);
             var toTile = logicalTile;

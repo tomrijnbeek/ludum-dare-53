@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public readonly struct Path
@@ -12,5 +13,10 @@ public readonly struct Path
     {
         Start = start;
         Directions = directions;
+    }
+
+    public Path Clamped(int maxLength)
+    {
+        return Length <= maxLength ? this : new Path(Start, Directions.Take(maxLength).ToList().AsReadOnly());
     }
 }

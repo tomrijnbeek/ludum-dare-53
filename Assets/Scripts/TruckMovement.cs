@@ -11,6 +11,8 @@ public sealed class TruckMovement : MonoBehaviour
 
     private Pathfinder pathfinder;
 
+    [CanBeNull] private VehicleMovement currentMovement;
+
     private void Start()
     {
         pathfinder = new Pathfinder(cityMap);
@@ -18,7 +20,21 @@ public sealed class TruckMovement : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetMouseButtonDown(0) && tryFindTile(out var tile) && attemptTruckMove(tile))
+        if (currentMovement != null)
+        {
+            if (!currentMovement.Done)
+            {
+                return;
+            }
+            currentMovement = null;
+        }
+
+        if (tryFindTile(out var tile) && pathfinder.TryFindPath(truck.LogicalTile, tile, out var path))
+        {
+            truck.PreparePath(path.Clamped(truck.RangePerTurn));
+        }
+
+        if (Input.GetMouseButtonDown(0))
         {
             PathSelected?.Invoke();
         }
@@ -26,7 +42,8 @@ public sealed class TruckMovement : MonoBehaviour
 
     public VehicleMovement ExecuteTurn()
     {
-        return truck.TraversePreparedPath();
+        currentMovement = truck.TraversePreparedPath();
+        return currentMovement;
     }
 
     private bool tryFindTile(out Vector3Int tile)
@@ -41,16 +58,5 @@ public sealed class TruckMovement : MonoBehaviour
 
         tile = default;
         return false;
-    }
-
-    private bool attemptTruckMove(Vector3Int tile)
-    {
-        if (!pathfinder.TryFindPath(truck.LogicalTile, tile, out var path))
-        {
-            return false;
-        }
-
-        truck.PreparePath(path);
-        return true;
     }
 }

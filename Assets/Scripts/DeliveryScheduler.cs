@@ -40,7 +40,7 @@ public sealed class DeliveryScheduler : Singleton<DeliveryScheduler>
         }
 
         Building b = null;
-        for (var i = 0; i < 10; i++)
+        for (var i = 0; i < 100; i++)
         {
             b = buildings[Random.Range(0, buildings.Count)];
             var lastOrder = lastOrderResolved.GetValueOrDefault(b.RoadTile, int.MinValue);

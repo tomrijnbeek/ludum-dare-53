@@ -1969,8 +1969,8 @@ MonoBehaviour:
   vehicleLocations: {fileID: 1329389908}
   movementTicksPerSecond: 8
   turnsBetweenOrders: 6
-  turnsBetweenPoliceSpawns: 14
-  turnsBetweenMinOrderIncreases: 20
+  turnsBetweenPoliceSpawns: 16
+  turnsBetweenMinOrderIncreases: 27
   orderTimeout: 9
 --- !u!114 &2114889447
 MonoBehaviour:

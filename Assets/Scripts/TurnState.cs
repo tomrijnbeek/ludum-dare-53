@@ -7,10 +7,10 @@ public sealed class TurnState : Singleton<TurnState>
     [SerializeField] private TruckMovement playerMovement;
     [SerializeField] private VehicleLocations vehicleLocations;
     [SerializeField] private float movementTicksPerSecond = 6;
-    [SerializeField] private int turnsBetweenOrders = 4;
-    [SerializeField] private int turnsBetweenPoliceSpawns = 12;
-    [SerializeField] private int turnsBetweenMinOrderIncreases = 25;
-    [SerializeField] private int orderTimeout = 7;
+    [SerializeField] private int turnsBetweenOrders = 5;
+    [SerializeField] private int turnsBetweenPoliceSpawns = 16;
+    [SerializeField] private int turnsBetweenMinOrderIncreases = 27;
+    [SerializeField] private int orderTimeout = 8;
     [Readonly] private State state;
     [Readonly] private int turnNumber;
     [Readonly] private int nextOrder = 1;

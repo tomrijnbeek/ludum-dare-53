@@ -13,6 +13,7 @@ public sealed class DeliveryScheduler : Singleton<DeliveryScheduler>
     private readonly List<Building> buildings = new();
     private readonly List<Order> orders = new();
     private readonly Dictionary<Vector3Int, Order> ordersByTile = new();
+    private readonly Dictionary<Vector3Int, int> lastOrderResolved = new();
 
     public bool AllOrdersDelivered => orders.Count == 0;
 
@@ -37,7 +38,22 @@ public sealed class DeliveryScheduler : Singleton<DeliveryScheduler>
             return;
         }
 
-        var b = buildings[Random.Range(0, buildings.Count)];
+        Building b = null;
+        for (var i = 0; i < 10; i++)
+        {
+            b = buildings[Random.Range(0, buildings.Count)];
+            var lastOrder = lastOrderResolved.GetValueOrDefault(b.RoadTile, int.MinValue);
+            if (!ordersByTile.ContainsKey(b.RoadTile) || currentTurn - lastOrder < 2)
+            {
+                break;
+            }
+            b = null;
+        }
+        if (b is null)
+        {
+            Debug.LogWarning("Could not find a building with an empty tile to place an order.");
+            return;
+        }
         var indicatorObj = Instantiate(indicator, b.transform, true);
         indicatorObj.transform.position = cityMap.TileToCenterWorld(b.RoadTile);
         var popupObj = Instantiate(popupPrefab, b.transform, true);
@@ -63,6 +79,7 @@ public sealed class DeliveryScheduler : Singleton<DeliveryScheduler>
         Destroy(order.Popup.gameObject);
         orders.Remove(order);
         ordersByTile.Remove(tile);
+        lastOrderResolved[tile] = TurnState.Instance.TurnNumber;
     }
 
     public sealed record Order(

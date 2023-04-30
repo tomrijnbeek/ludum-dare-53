@@ -56,7 +56,7 @@ public sealed class Vehicle : MonoBehaviour
 
     private void OnDestroy()
     {
-        VehicleLocations.Instance.UnregisterVehicle(logicalTile, this);
+        VehicleLocations.Instance?.UnregisterVehicle(logicalTile, this);
     }
 
     public void Teleport(Vector3Int tile, Direction dir)

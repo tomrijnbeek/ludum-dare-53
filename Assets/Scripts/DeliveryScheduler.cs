@@ -16,6 +16,7 @@ public sealed class DeliveryScheduler : Singleton<DeliveryScheduler>
     private readonly Dictionary<Vector3Int, int> lastOrderResolved = new();
 
     public int OpenOrderCount => orders.Count;
+    public int Points => points;
 
     public void RegisterBuilding(Building building)
     {

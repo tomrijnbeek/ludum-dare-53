@@ -17,6 +17,7 @@ public sealed class TurnState : Singleton<TurnState>
     [Readonly] private int nextPoliceSpawn = 1;
 
     public int TurnNumber => turnNumber;
+    public bool FirstMovementDone { get; private set; }
 
     private DeliveryScheduler deliveries;
 
@@ -95,6 +96,7 @@ public sealed class TurnState : Singleton<TurnState>
         ongoingMovements.Add(playerMovement.CommitMovement());
         ongoingMovements.AddRange(policeManager.CommitMovement());
         nextMovementTick = Time.time;
+        FirstMovementDone = true;
     }
 
     public void Lose()

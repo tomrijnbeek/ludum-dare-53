@@ -24,5 +24,10 @@ public abstract class Singleton<T> : MonoBehaviour where T : Singleton<T>
         SingletonAwake();
     }
 
+    private void OnDestroy()
+    {
+        instance = null;
+    }
+
     protected void SingletonAwake() {}
 }

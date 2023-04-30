@@ -60,12 +60,14 @@ public sealed class VehicleLocations : MonoBehaviour
     private void checkTransitionQueueForHeadOnCollisions()
     {
         var transitionsByOrigin = transitionQueue.ToLookup(transition => transition.From);
-        foreach (var (_, from, to) in transitionQueue)
+        foreach (var (v, from, to) in transitionQueue)
         {
+            if (!v.IsPlayer) return;
             var departingFromTo = transitionsByOrigin[to];
             if (departingFromTo.Any(otherTransition => otherTransition.To == from))
             {
-                lose();
+                Debug.Log($"found vehicle colliding with {v.name}");
+                TurnState.Instance.Lose();
                 return;
             }
         }
@@ -78,15 +80,12 @@ public sealed class VehicleLocations : MonoBehaviour
             var vs = vehiclesOnTile(tile);
             if (vs.Count > 1 && vs.Any(v => v.IsPlayer))
             {
-                lose();
+                var vString = string.Join("; ", vs.Select(v => v.name));
+                Debug.Log($"found in the same tile: {vString}");
+                TurnState.Instance.Lose();
                 return;
             }
         }
-    }
-
-    private void lose()
-    {
-        Debug.LogWarning("You lose!");
     }
 
     private IList<Vehicle> vehiclesOnTile(Vector3Int tile)

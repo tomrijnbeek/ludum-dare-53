@@ -1,10 +1,12 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
 public sealed class DeliveryScheduler : Singleton<DeliveryScheduler>
 {
     [SerializeField] private GameObject indicator;
+    [SerializeField] private GameObject popupPrefab;
     [SerializeField] private CityMap cityMap;
     [Readonly] private int points;
 
@@ -12,17 +14,19 @@ public sealed class DeliveryScheduler : Singleton<DeliveryScheduler>
     private readonly List<Order> orders = new();
     private readonly Dictionary<Vector3Int, Order> ordersByTile = new();
 
-    private void Update()
-    {
-        if (orders.Count == 0)
-        {
-            PlaceOrder(0, 0);
-        }
-    }
+    public bool AllOrdersDelivered => orders.Count == 0;
 
     public void RegisterBuilding(Building building)
     {
         buildings.Add(building);
+    }
+
+    public void ProcessTurnStart(int newTurnNumber)
+    {
+        if (orders.Any(o => o.ExpiryTurn <= newTurnNumber))
+        {
+            TurnState.Instance.Lose();
+        }
     }
 
     public void PlaceOrder(int currentTurn, int duration)
@@ -36,8 +40,12 @@ public sealed class DeliveryScheduler : Singleton<DeliveryScheduler>
         var b = buildings[Random.Range(0, buildings.Count)];
         var indicatorObj = Instantiate(indicator, b.transform, true);
         indicatorObj.transform.position = cityMap.TileToCenterWorld(b.RoadTile);
+        var popupObj = Instantiate(popupPrefab, b.transform, true);
+        popupObj.transform.position = cityMap.TileToCenterWorld(b.RoadTile);
+        var popup = popupObj.GetComponent<OrderPopup>();
 
-        var order = new Order(b, indicatorObj, currentTurn, currentTurn + duration);
+        var order = new Order(b, indicatorObj, popup, currentTurn, currentTurn + duration);
+        popup.SetOrder(order);
         orders.Add(order);
         ordersByTile.Add(b.RoadTile, order);
     }
@@ -50,24 +58,20 @@ public sealed class DeliveryScheduler : Singleton<DeliveryScheduler>
         }
 
         points++;
+        Debug.Log($"{points} points");
         Destroy(order.Indicator);
+        Destroy(order.Popup.gameObject);
         orders.Remove(order);
         ordersByTile.Remove(tile);
     }
 
-    public readonly struct Order
+    public sealed record Order(
+        Building Building, GameObject Indicator, OrderPopup Popup, int PlacedTurn, int ExpiryTurn)
     {
-        public Building Building { get; }
-        public GameObject Indicator { get; }
-        public int PlacedTurn { get; }
-        public int ExpiryTurn { get; }
-
-        public Order(Building building, GameObject indicator, int placedTurn, int expiryTurn)
-        {
-            Building = building;
-            Indicator = indicator;
-            PlacedTurn = placedTurn;
-            ExpiryTurn = expiryTurn;
-        }
+        public Building Building { get; } = Building;
+        public GameObject Indicator { get; } = Indicator;
+        public OrderPopup Popup { get; } = Popup;
+        public int PlacedTurn { get; } = PlacedTurn;
+        public int ExpiryTurn { get; } = ExpiryTurn;
     }
 }

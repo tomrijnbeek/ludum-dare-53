@@ -7,12 +7,12 @@ public sealed class CityMap : MonoBehaviour
 
     private readonly TileType[,] map = {
         { TileType.Road, TileType.Road, TileType.Road, TileType.Road, TileType.Empty, TileType.Empty, TileType.Empty, TileType.Empty },
-        { TileType.Road, TileType.Empty, TileType.Empty, TileType.Road, TileType.Road, TileType.Road, TileType.Road, TileType.Road },
-        { TileType.Road, TileType.Road, TileType.Road, TileType.Road, TileType.Road, TileType.Empty, TileType.Empty, TileType.Road },
-        { TileType.Road, TileType.Empty, TileType.Road, TileType.Empty, TileType.Road, TileType.Empty, TileType.Road, TileType.Road },
-        { TileType.Road, TileType.Road, TileType.Road, TileType.Empty, TileType.Road, TileType.Empty, TileType.Road, TileType.Empty },
-        { TileType.Road, TileType.Empty, TileType.Road, TileType.Road, TileType.Road, TileType.Road, TileType.Road, TileType.Road },
-        { TileType.Road, TileType.Empty, TileType.Empty, TileType.Road, TileType.Empty, TileType.Empty, TileType.Empty, TileType.Road },
+        { TileType.Road, TileType.Building, TileType.Empty, TileType.Road, TileType.Road, TileType.Road, TileType.Road, TileType.Road },
+        { TileType.Road, TileType.Road, TileType.Road, TileType.Road, TileType.Road, TileType.Empty, TileType.Building, TileType.Road },
+        { TileType.Road, TileType.Building, TileType.Road, TileType.Building, TileType.Road, TileType.Building, TileType.Road, TileType.Road },
+        { TileType.Road, TileType.Road, TileType.Road, TileType.Building, TileType.Road, TileType.Building, TileType.Road, TileType.Building },
+        { TileType.Road, TileType.Building, TileType.Road, TileType.Road, TileType.Road, TileType.Road, TileType.Road, TileType.Road },
+        { TileType.Road, TileType.Empty, TileType.Building, TileType.Road, TileType.Building, TileType.Empty, TileType.Building, TileType.Road },
         { TileType.Road, TileType.Road, TileType.Road, TileType.Road, TileType.Road, TileType.Road, TileType.Road, TileType.Road },
     };
 
@@ -44,10 +44,12 @@ public sealed class CityMap : MonoBehaviour
 public enum TileType
 {
     Empty,
-    Road
+    Road,
+    Building,
 }
 
 public static class TileTypeExtensions
 {
     public static bool IsRoad(this TileType tileType) => tileType == TileType.Road;
+    public static bool IsBuilding(this TileType tileType) => tileType == TileType.Building;
 }

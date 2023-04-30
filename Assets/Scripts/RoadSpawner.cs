@@ -1,9 +1,8 @@
-using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
-using UnityEngine.Tilemaps;
 
-public class RoadSpawner : MonoBehaviour
+public sealed class RoadSpawner : MonoBehaviour
 {
     [SerializeField] private CityMap cityMap;
 
@@ -14,6 +13,8 @@ public class RoadSpawner : MonoBehaviour
     [SerializeField] private GameObject curve;
     [SerializeField] private GameObject tIntersection;
     [SerializeField] private GameObject xIntersection;
+
+    [SerializeField] private GameObject[] buildings;
 
     private static readonly Directions[] deadEndDirections =
     {
@@ -61,7 +62,7 @@ public class RoadSpawner : MonoBehaviour
         cacheObjectMap(tIntersectionDirections, tIntersection);
         cacheObjectMap(xIntersectionDirections, xIntersection);
 
-        spawnRoads();
+        populateTile();
     }
 
     private void cacheObjectMap(Directions[] arr, GameObject obj)
@@ -72,7 +73,7 @@ public class RoadSpawner : MonoBehaviour
         }
     }
 
-    private void spawnRoads()
+    private void populateTile()
     {
         for (var y = 0; y < cityMap.Height; y++)
         {
@@ -83,6 +84,10 @@ public class RoadSpawner : MonoBehaviour
                 if (isRoad(tile))
                 {
                     spawnRoad(tile);
+                }
+                if (isBuilding(tile))
+                {
+                    spawnBuilding(tile);
                 }
             }
         }
@@ -111,5 +116,26 @@ public class RoadSpawner : MonoBehaviour
         road.transform.rotation = Quaternion.AngleAxis(orientation, Vector3.up);
     }
 
-    private bool isRoad(Vector3Int tile) => cityMap.IsValid(tile) && cityMap.TileAt(tile) == TileType.Road;
+    private void spawnBuilding(Vector3Int tile)
+    {
+        if (buildings.Length == 0)
+        {
+            Debug.LogWarning("Attempting to spawn building, but no prefabs found.");
+            return;
+        }
+
+        var building = buildings[Random.Range(0, buildings.Length)];
+        var surroundingRoads = DirectionHelpers.EnumerateDirections()
+            .Where(dir => isRoad(tile.Neighbour(dir))).ToArray();
+        var forward = surroundingRoads.Length == 0
+            ? Vector3.forward
+            : surroundingRoads[Random.Range(0, surroundingRoads.Length)].Forward();
+
+        var buildingObj = Instantiate(building, transform, true);
+        buildingObj.transform.position = cityMap.TileToCenterWorld(tile);
+        building.transform.forward = forward;
+    }
+
+    private bool isRoad(Vector3Int tile) => cityMap.IsValid(tile) && cityMap.TileAt(tile).IsRoad();
+    private bool isBuilding(Vector3Int tile) => cityMap.IsValid(tile) && cityMap.TileAt(tile).IsBuilding();
 }

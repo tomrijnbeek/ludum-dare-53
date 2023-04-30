@@ -1,21 +1,47 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public sealed class PoliceManager : MonoBehaviour
 {
     [SerializeField] private CityMap cityMap;
+    [SerializeField] private Vector3Int[] spawnTiles;
+    [SerializeField] private GameObject prefab;
 
-    private bool turnPrepared;
     private readonly List<PoliceVehicle> vehicles = new();
 
-    public void RegisterVehicle(PoliceVehicle vehicle)
+    public void SpawnPoliceCar(Vector3Int currentPlayerPos)
     {
-        vehicles.Add(vehicle);
-        if (turnPrepared)
+        var tile = determineSpawnTile(currentPlayerPos);
+        var dir = determineSpawnDirection(tile);
+        var obj = Instantiate(prefab);
+        var pv = obj.GetComponent<PoliceVehicle>();
+        vehicles.Add(pv);
+        pv.Vehicle.Teleport(tile, dir);
+        obj.name = $"Pineapple police {vehicles.Count}";
+    }
+
+    private Vector3Int determineSpawnTile(Vector3Int currentPlayerPos)
+    {
+        if (spawnTiles.Length == 0)
         {
-            prepareTurn(vehicle.Vehicle);
+            return Vector3Int.zero;
         }
+        var furthestSpawn = spawnTiles.OrderByDescending(t => distance(t, currentPlayerPos)).First();
+        return furthestSpawn;
+    }
+
+    private Direction determineSpawnDirection(Vector3Int tile)
+    {
+        var validDirections = DirectionHelpers.EnumerateDirections().Where(dir =>
+        {
+            var nb = tile.Neighbour(dir);
+            return cityMap.IsValid(nb) && cityMap.TileAt(nb).IsRoad();
+        }).ToArray();
+        return validDirections.Length == 0
+            ? Direction.PositiveX
+            : validDirections[Random.Range(0, validDirections.Length)];
     }
 
     public void PrepareTurn()
@@ -24,7 +50,6 @@ public sealed class PoliceManager : MonoBehaviour
         {
             prepareTurn(vehicle.Vehicle);
         }
-        turnPrepared = true;
     }
 
     private void prepareTurn(Vehicle vehicle)
@@ -36,7 +61,6 @@ public sealed class PoliceManager : MonoBehaviour
 
     public IEnumerable<VehicleMovement> CommitMovement()
     {
-        turnPrepared = false;
         return vehicles.Select(v => v.Vehicle.CommitVehicleMovement()).ToList();
     }
 
@@ -73,4 +97,6 @@ public sealed class PoliceManager : MonoBehaviour
 
         return validDirs[Random.Range(0, validDirs.Count)];
     }
+
+    private static int distance(Vector3Int x, Vector3Int y) => (x - y).sqrMagnitude;
 }

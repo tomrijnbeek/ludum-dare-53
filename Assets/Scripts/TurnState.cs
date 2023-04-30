@@ -7,11 +7,14 @@ public sealed class TurnState : Singleton<TurnState>
     [SerializeField] private TruckMovement playerMovement;
     [SerializeField] private VehicleLocations vehicleLocations;
     [SerializeField] private float movementTicksPerSecond = 6;
-    [SerializeField] private int turnsBetweenOrders = 5;
+    [SerializeField] private int turnsBetweenOrders = 4;
+    [SerializeField] private int turnsBetweenPoliceSpawns = 12;
+    [SerializeField] private int turnsBetweenMinOrderIncreases = 25;
     [SerializeField] private int orderTimeout = 7;
     [Readonly] private State state;
     [Readonly] private int turnNumber;
     [Readonly] private int nextOrder = 1;
+    [Readonly] private int nextPoliceSpawn = 1;
 
     public int TurnNumber => turnNumber;
 
@@ -70,13 +73,20 @@ public sealed class TurnState : Singleton<TurnState>
         turnNumber++;
         state = State.PlayerInput;
         ongoingMovements.Clear();
-        policeManager.PrepareTurn();
-        deliveries.ProcessTurnStart(turnNumber);
-        if (nextOrder <= turnNumber || deliveries.AllOrdersDelivered)
+        if (nextPoliceSpawn <= turnNumber)
+        {
+            policeManager.SpawnPoliceCar(playerMovement.CurrentTile);
+            nextPoliceSpawn = turnNumber + turnsBetweenPoliceSpawns;
+        }
+
+        var minActiveOrders = 1 + turnNumber / turnsBetweenMinOrderIncreases;
+        while (nextOrder <= turnNumber || deliveries.OpenOrderCount < minActiveOrders)
         {
             deliveries.PlaceOrder(turnNumber, orderTimeout);
             nextOrder = turnNumber + turnsBetweenOrders;
         }
+        policeManager.PrepareTurn();
+        deliveries.ProcessTurnStart(turnNumber);
     }
 
     private void toMovementState()

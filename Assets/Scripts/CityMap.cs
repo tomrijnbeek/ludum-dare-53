@@ -1,19 +1,21 @@
 using System;
 using UnityEngine;
 
-public sealed class CityMap : MonoBehaviour
+public sealed class CityMap : Singleton<CityMap>
 {
     [SerializeField] private Grid grid;
 
     private readonly TileType[,] map = {
-        { TileType.Road, TileType.Road, TileType.Road, TileType.Road, TileType.Empty, TileType.Empty, TileType.Empty, TileType.Empty },
-        { TileType.Road, TileType.Building, TileType.Empty, TileType.Road, TileType.Road, TileType.Road, TileType.Road, TileType.Road },
-        { TileType.Road, TileType.Road, TileType.Road, TileType.Road, TileType.Road, TileType.Empty, TileType.Building, TileType.Road },
-        { TileType.Road, TileType.Building, TileType.Road, TileType.Building, TileType.Road, TileType.Building, TileType.Road, TileType.Road },
-        { TileType.Road, TileType.Road, TileType.Road, TileType.Building, TileType.Road, TileType.Building, TileType.Road, TileType.Building },
-        { TileType.Road, TileType.Building, TileType.Road, TileType.Road, TileType.Road, TileType.Road, TileType.Road, TileType.Road },
-        { TileType.Road, TileType.Empty, TileType.Building, TileType.Road, TileType.Building, TileType.Empty, TileType.Building, TileType.Road },
-        { TileType.Road, TileType.Road, TileType.Road, TileType.Road, TileType.Road, TileType.Road, TileType.Road, TileType.Road },
+        { TileType.Road, TileType.Road, TileType.Road, TileType.Road, TileType.Road, TileType.Road, TileType.Road, TileType.Building, TileType.Empty, TileType.Empty },
+        { TileType.Road, TileType.Empty, TileType.Building, TileType.Road, TileType.Building, TileType.Empty, TileType.Road, TileType.Road, TileType.Road, TileType.Building },
+        { TileType.Road, TileType.Building, TileType.Road, TileType.Road, TileType.Road, TileType.Road, TileType.Road, TileType.Empty, TileType.Road, TileType.Road },
+        { TileType.Road, TileType.Road, TileType.Road, TileType.Building, TileType.Empty, TileType.Building, TileType.Road, TileType.Building, TileType.Building, TileType.Road },
+        { TileType.Road, TileType.Empty, TileType.Road, TileType.Road, TileType.Building, TileType.Road, TileType.Road, TileType.Road, TileType.Road, TileType.Road },
+        { TileType.Road, TileType.Road, TileType.Building, TileType.Road, TileType.Road, TileType.Road, TileType.Building, TileType.Empty, TileType.Road, TileType.Empty },
+        { TileType.Building, TileType.Road, TileType.Empty, TileType.Road, TileType.Building, TileType.Road, TileType.Empty, TileType.Building, TileType.Road, TileType.Building },
+        { TileType.Road, TileType.Road, TileType.Road, TileType.Road, TileType.Building, TileType.Road, TileType.Road, TileType.Road, TileType.Road, TileType.Road },
+        { TileType.Road, TileType.Building, TileType.Building, TileType.Road, TileType.Road, TileType.Road, TileType.Building, TileType.Building, TileType.Building, TileType.Road },
+        { TileType.Road, TileType.Road, TileType.Road, TileType.Road, TileType.Building, TileType.Road, TileType.Road, TileType.Road, TileType.Road, TileType.Road },
     };
 
     public int Width => map.GetLength(0);

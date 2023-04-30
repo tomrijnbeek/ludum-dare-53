@@ -2,9 +2,9 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public sealed class VehicleLocations : MonoBehaviour
+public sealed class VehicleLocations : Singleton<VehicleLocations>
 {
-    private IList<Vehicle> emptyList = new List<Vehicle>(0).AsReadOnly();
+    private readonly IList<Vehicle> emptyList = new List<Vehicle>(0).AsReadOnly();
 
     private readonly Dictionary<Vector3Int, List<Vehicle>> vehicles = new();
     private readonly List<(Vehicle Vehicle, Vector3Int From, Vector3Int To)> transitionQueue = new();
@@ -12,6 +12,12 @@ public sealed class VehicleLocations : MonoBehaviour
     public void RegisterVehicle(Vector3Int tile, Vehicle vehicle)
     {
         addVehicle(tile, vehicle);
+    }
+
+    public void UnregisterVehicle(Vector3Int tile, Vehicle vehicle)
+    {
+        removeVehicle(tile, vehicle);
+        transitionQueue.RemoveAll(t => t.Vehicle == vehicle);
     }
 
     public void QueueTransition(Vehicle vehicle, Vector3Int from, Vector3Int to)
@@ -66,7 +72,6 @@ public sealed class VehicleLocations : MonoBehaviour
             var departingFromTo = transitionsByOrigin[to];
             if (departingFromTo.Any(otherTransition => otherTransition.To == from))
             {
-                Debug.Log($"found vehicle colliding with {v.name}");
                 TurnState.Instance.Lose();
                 return;
             }
@@ -80,8 +85,6 @@ public sealed class VehicleLocations : MonoBehaviour
             var vs = vehiclesOnTile(tile);
             if (vs.Count > 1 && vs.Any(v => v.IsPlayer))
             {
-                var vString = string.Join("; ", vs.Select(v => v.name));
-                Debug.Log($"found in the same tile: {vString}");
                 TurnState.Instance.Lose();
                 return;
             }
@@ -90,7 +93,6 @@ public sealed class VehicleLocations : MonoBehaviour
 
     private IList<Vehicle> vehiclesOnTile(Vector3Int tile)
     {
-        emptyList = new List<Vehicle>();
         return vehicles.TryGetValue(tile, out var list) ? list : emptyList;
     }
 }

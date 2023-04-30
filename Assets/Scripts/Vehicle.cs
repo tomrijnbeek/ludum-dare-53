@@ -1,5 +1,5 @@
+using System;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 [RequireComponent(typeof(LineRenderer))]
 public sealed class Vehicle : MonoBehaviour
@@ -8,10 +8,8 @@ public sealed class Vehicle : MonoBehaviour
 
     [SerializeField] private Vector3Int logicalTile;
     [SerializeField] private Direction orientation = Direction.PositiveX;
-    [SerializeField] private CityMap cityMap;
-    [SerializeField] private VehicleLocations vehicleLocations;
     [SerializeField] private int rangePerTurn = 3;
-    [FormerlySerializedAs("loseOnCollision")] [SerializeField] private bool isPlayer = false;
+    [SerializeField] private bool isPlayer;
 
     public Vector3Int LogicalTile => logicalTile;
     public Direction Orientation => orientation;
@@ -19,17 +17,24 @@ public sealed class Vehicle : MonoBehaviour
     public bool IsPlayer => isPlayer;
     public Path PreparedPath { get; private set; }
 
+    private bool started;
     private LineRenderer lineRenderer;
 
     private TileTransition? currentTransition;
 
-    private void Start()
+    private void Awake()
     {
         lineRenderer = GetComponent<LineRenderer>();
-        transform.position = cityMap.TileToCenterWorld(logicalTile);
+        PreparedPath = Path.Empty;
+        VehicleLocations.Instance.RegisterVehicle(logicalTile, this);
+    }
+
+    private void Start()
+    {
+        transform.position = CityMap.Instance.TileToCenterWorld(logicalTile);
         transform.forward = orientation.Forward();
         setLineRendererVertices();
-        vehicleLocations.RegisterVehicle(logicalTile, this);
+        started = true;
     }
 
     private void Update()
@@ -49,6 +54,24 @@ public sealed class Vehicle : MonoBehaviour
         }
     }
 
+    private void OnDestroy()
+    {
+        VehicleLocations.Instance.UnregisterVehicle(logicalTile, this);
+    }
+
+    public void Teleport(Vector3Int tile, Direction dir)
+    {
+        if (started)
+        {
+            throw new InvalidOperationException();
+        }
+        VehicleLocations.Instance.UnregisterVehicle(logicalTile, this);
+        PreparedPath = Path.Empty;
+        logicalTile = tile;
+        orientation = dir;
+        VehicleLocations.Instance.RegisterVehicle(logicalTile, this);
+    }
+
     public void PreparePath(Path path)
     {
         PreparedPath = path;
@@ -64,12 +87,12 @@ public sealed class Vehicle : MonoBehaviour
         }
 
         var vertices = new Vector3[PreparedPath.Length + 1];
-        vertices[0] = cityMap.TileToCenterWorld(PreparedPath.Start).WithY(lineHeight);
+        vertices[0] = CityMap.Instance.TileToCenterWorld(PreparedPath.Start).WithY(lineHeight);
         var curr = PreparedPath.Start;
         for (var i = 0; i < PreparedPath.Length; i++)
         {
             curr = curr.Neighbour(PreparedPath.Directions[i]);
-            vertices[i + 1] = cityMap.TileToCenterWorld(curr).WithY(lineHeight);
+            vertices[i + 1] = CityMap.Instance.TileToCenterWorld(curr).WithY(lineHeight);
         }
 
         lineRenderer.positionCount = vertices.Length;
@@ -91,11 +114,11 @@ public sealed class Vehicle : MonoBehaviour
         var toTile = logicalTile;
         transform.forward = dir.Forward();
         currentTransition = new TileTransition(
-            cityMap.TileToCenterWorld(fromTile),
-            cityMap.TileToCenterWorld(toTile),
+            CityMap.Instance.TileToCenterWorld(fromTile),
+            CityMap.Instance.TileToCenterWorld(toTile),
             Time.time,
             Time.time + tickDuration);
-        vehicleLocations.QueueTransition(this, fromTile, toTile);
+        VehicleLocations.Instance.QueueTransition(this, fromTile, toTile);
     }
 
     private readonly struct TileTransition

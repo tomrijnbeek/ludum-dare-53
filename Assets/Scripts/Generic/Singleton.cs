@@ -15,7 +15,7 @@ public abstract class Singleton<T> : MonoBehaviour where T : Singleton<T>
 
     private void Awake()
     {
-        if (instance != null)
+        if (instance != null && instance != this)
         {
             Debug.LogWarning($"Found duplicate instance of {typeof(T)} in game object {gameObject.name}");
             return;

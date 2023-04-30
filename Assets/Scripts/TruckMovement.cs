@@ -17,6 +17,8 @@ public sealed class TruckMovement : MonoBehaviour
 
     [CanBeNull] private VehicleMovement currentMovement;
 
+    public Vector3Int CurrentTile => truck.LogicalTile;
+
     private void Start()
     {
         pathfinder = new Pathfinder(cityMap);

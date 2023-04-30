@@ -15,7 +15,7 @@ public sealed class DeliveryScheduler : Singleton<DeliveryScheduler>
     private readonly Dictionary<Vector3Int, Order> ordersByTile = new();
     private readonly Dictionary<Vector3Int, int> lastOrderResolved = new();
 
-    public bool AllOrdersDelivered => orders.Count == 0;
+    public int OpenOrderCount => orders.Count;
 
     public void RegisterBuilding(Building building)
     {
@@ -43,7 +43,7 @@ public sealed class DeliveryScheduler : Singleton<DeliveryScheduler>
         {
             b = buildings[Random.Range(0, buildings.Count)];
             var lastOrder = lastOrderResolved.GetValueOrDefault(b.RoadTile, int.MinValue);
-            if (!ordersByTile.ContainsKey(b.RoadTile) || currentTurn - lastOrder < 2)
+            if (!ordersByTile.ContainsKey(b.RoadTile) && currentTurn - lastOrder < 2)
             {
                 break;
             }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public enum Direction : byte
@@ -36,6 +37,11 @@ public static class DirectionHelpers
     public static IEnumerable<Direction> EnumerateDirections()
     {
         return new[] { Direction.PositiveX, Direction.PositiveY, Direction.NegativeX, Direction.NegativeY };
+    }
+
+    public static IEnumerable<Vector3Int> EnumerateNeighbours(Vector3Int tile)
+    {
+        return EnumerateDirections().Select(dir => tile.Neighbour(dir));
     }
 
     public static (Direction X, Direction Y) FromDifference(Vector3Int difference)

@@ -5,7 +5,6 @@ using Random = UnityEngine.Random;
 
 public sealed class PoliceManager : MonoBehaviour
 {
-    [SerializeField] private CityMap cityMap;
     [SerializeField] private Vector3Int[] spawnTiles;
     [SerializeField] private GameObject prefab;
 
@@ -37,7 +36,7 @@ public sealed class PoliceManager : MonoBehaviour
         var validDirections = DirectionHelpers.EnumerateDirections().Where(dir =>
         {
             var nb = tile.Neighbour(dir);
-            return cityMap.IsValid(nb) && cityMap.TileAt(nb).IsRoad();
+            return CityMap.Instance.IsValid(nb) && CityMap.Instance.TileAt(nb).IsRoad();
         }).ToArray();
         return validDirections.Length == 0
             ? Direction.PositiveX
@@ -83,7 +82,7 @@ public sealed class PoliceManager : MonoBehaviour
     private Direction generateRandomDirection(Vector3Int tile, Direction previousDir)
     {
         var validDirs = DirectionHelpers.EnumerateDirections()
-            .Where(dir => cityMap.IsValid(tile.Neighbour(dir)) && cityMap.TileAt(tile.Neighbour(dir)).IsRoad())
+            .Where(dir => CityMap.Instance.IsValid(tile.Neighbour(dir)) && CityMap.Instance.TileAt(tile.Neighbour(dir)).IsRoad())
             .ToList();
         if (validDirs.Count > 1)
         {

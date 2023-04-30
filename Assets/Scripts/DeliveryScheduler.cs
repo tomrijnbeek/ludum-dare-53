@@ -35,7 +35,7 @@ public sealed class DeliveryScheduler : Singleton<DeliveryScheduler>
     {
         if (buildings.Count == 0)
         {
-            Debug.LogWarning("Attempted to place order but no buildings spawned.");
+            //Debug.LogWarning("Attempted to place order but no buildings spawned.");
             return;
         }
 

@@ -8,6 +8,9 @@ public sealed class TurnState : MonoBehaviour
     [SerializeField] private VehicleLocations vehicleLocations;
     [SerializeField] private float movementTicksPerSecond = 6;
     [Readonly] private State state;
+    [Readonly] private int turnNumber;
+
+    private DeliveryScheduler deliveries;
 
     private float movementTickDuration => 1 / movementTicksPerSecond;
 
@@ -16,6 +19,7 @@ public sealed class TurnState : MonoBehaviour
 
     private void Start()
     {
+        deliveries = GetComponent<DeliveryScheduler>();
         playerMovement.PathSelected += onPlayerPathSelected;
         toPlayerInputState();
     }
@@ -58,6 +62,7 @@ public sealed class TurnState : MonoBehaviour
 
     private void toPlayerInputState()
     {
+        turnNumber++;
         state = State.PlayerInput;
         ongoingMovements.Clear();
         policeManager.PrepareTurn();

@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [RequireComponent(typeof(LineRenderer))]
 public sealed class Vehicle : MonoBehaviour
@@ -10,12 +11,12 @@ public sealed class Vehicle : MonoBehaviour
     [SerializeField] private CityMap cityMap;
     [SerializeField] private VehicleLocations vehicleLocations;
     [SerializeField] private int rangePerTurn = 3;
-    [SerializeField] private bool loseOnCollision = false;
+    [FormerlySerializedAs("loseOnCollision")] [SerializeField] private bool isPlayer = false;
 
     public Vector3Int LogicalTile => logicalTile;
     public Direction Orientation => orientation;
     public int RangePerTurn => rangePerTurn;
-    public bool LoseOnCollision => loseOnCollision;
+    public bool IsPlayer => isPlayer;
     public Path PreparedPath { get; private set; }
 
     private LineRenderer lineRenderer;

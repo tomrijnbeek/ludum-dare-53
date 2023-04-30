@@ -28,6 +28,10 @@ public sealed class VehicleLocations : MonoBehaviour
         {
             removeVehicle(transition.From, transition.Vehicle);
             addVehicle(transition.To, transition.Vehicle);
+            if (transition.Vehicle.IsPlayer)
+            {
+                DeliveryScheduler.Instance.ProcessPlayerInTile(transition.To);
+            }
             candidateTiles.Add(transition.From);
             candidateTiles.Add(transition.To);
         }
@@ -72,7 +76,7 @@ public sealed class VehicleLocations : MonoBehaviour
         foreach (var tile in tiles)
         {
             var vs = vehiclesOnTile(tile);
-            if (vs.Count > 1 && vs.Any(v => v.LoseOnCollision))
+            if (vs.Count > 1 && vs.Any(v => v.IsPlayer))
             {
                 lose();
                 return;

@@ -124,16 +124,19 @@ public sealed class RoadSpawner : MonoBehaviour
             return;
         }
 
-        var building = buildings[Random.Range(0, buildings.Length)];
+        var prefab = buildings[Random.Range(0, buildings.Length)];
         var surroundingRoads = DirectionHelpers.EnumerateDirections()
             .Where(dir => isRoad(tile.Neighbour(dir))).ToArray();
-        var forward = surroundingRoads.Length == 0
-            ? Vector3.forward
-            : surroundingRoads[Random.Range(0, surroundingRoads.Length)].Forward();
+        var forwardDir = surroundingRoads.Length == 0
+            ? Direction.PositiveX
+            : surroundingRoads[Random.Range(0, surroundingRoads.Length)];
 
-        var buildingObj = Instantiate(building, transform, true);
-        buildingObj.transform.position = cityMap.TileToCenterWorld(tile);
-        building.transform.forward = forward;
+        var building = Instantiate(prefab, transform, true);
+        building.transform.position = cityMap.TileToCenterWorld(tile);
+        building.transform.forward = forwardDir.Forward();
+
+        var buildingScript = building.AddComponent<Building>();
+        buildingScript.UpdateLocation(cityMap, tile, tile.Neighbour(forwardDir));
     }
 
     private bool isRoad(Vector3Int tile) => cityMap.IsValid(tile) && cityMap.TileAt(tile).IsRoad();

@@ -39,6 +39,8 @@ public sealed class Vehicle : MonoBehaviour
 
     private void Update()
     {
+        if (TurnState.Instance.GameOver) return;
+
         if (currentTransition is { } transition)
         {
             if (Time.time >= transition.EndTime)

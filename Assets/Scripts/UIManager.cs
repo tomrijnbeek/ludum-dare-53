@@ -1,9 +1,12 @@
+using JetBrains.Annotations;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public sealed class UIManager : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI score;
+    [SerializeField] private GameObject gameOver;
     [SerializeField] private TextMeshProUGUI[] tutorials;
     private bool firstClickDetected;
 
@@ -18,6 +21,17 @@ public sealed class UIManager : MonoBehaviour
             }
         }
 
+        if (TurnState.Instance.GameOver && !gameOver.activeSelf)
+        {
+            gameOver.SetActive(true);
+        }
+
         score.text = $"Turn: {TurnState.Instance.TurnNumber}\nScore: {DeliveryScheduler.Instance.Points}";
+    }
+
+    [UsedImplicitly]
+    public void Restart()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }

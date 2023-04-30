@@ -18,6 +18,7 @@ public sealed class TurnState : Singleton<TurnState>
 
     public int TurnNumber => turnNumber;
     public bool FirstMovementDone { get; private set; }
+    public bool GameOver => state == State.Lost;
 
     private DeliveryScheduler deliveries;
 
@@ -74,6 +75,13 @@ public sealed class TurnState : Singleton<TurnState>
         turnNumber++;
         state = State.PlayerInput;
         ongoingMovements.Clear();
+        deliveries.ProcessTurnStart(turnNumber);
+
+        if (state == State.Lost)
+        {
+            return;
+        }
+
         if (nextPoliceSpawn <= turnNumber)
         {
             policeManager.SpawnPoliceCar(playerMovement.CurrentTile);
@@ -87,7 +95,6 @@ public sealed class TurnState : Singleton<TurnState>
             nextOrder = turnNumber + turnsBetweenOrders;
         }
         policeManager.PrepareTurn();
-        deliveries.ProcessTurnStart(turnNumber);
     }
 
     private void toMovementState()
@@ -101,12 +108,13 @@ public sealed class TurnState : Singleton<TurnState>
 
     public void Lose()
     {
-        Debug.LogWarning("you lost");
+        state = State.Lost;
     }
 
     private enum State
     {
         PlayerInput,
         Movement,
+        Lost,
     }
 }

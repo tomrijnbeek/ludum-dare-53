@@ -75,7 +75,6 @@ public sealed class DeliveryScheduler : Singleton<DeliveryScheduler>
         }
 
         points++;
-        Debug.Log($"{points} points");
         Destroy(order.Indicator);
         Destroy(order.Popup.gameObject);
         orders.Remove(order);

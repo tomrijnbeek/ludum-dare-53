@@ -26,6 +26,11 @@ public sealed class TruckMovement : MonoBehaviour
 
     private void Update()
     {
+        if (TurnState.Instance.GameOver)
+        {
+            return;
+        }
+
         if (currentMovement != null)
         {
             if (!currentMovement.Done)
